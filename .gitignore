@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Your actual payment data — never commit this
+ledger.csv
+screenshots/*
+!screenshots/.gitkeep
+archive/
