@@ -132,6 +132,36 @@ def update_notes(payment_id):
     return jsonify(to_api_row(ledger_store.get(payment_id)))
 
 
+@app.delete("/api/payments/<payment_id>")
+def delete_payment(payment_id):
+    if not ledger_store.soft_delete(payment_id):
+        abort(404)
+    return jsonify({"ok": True})
+
+
+@app.get("/api/trash")
+def trash():
+    return jsonify([to_api_row(r) for r in ledger_store.list_trash()])
+
+
+@app.post("/api/payments/<payment_id>/restore")
+def restore_payment(payment_id):
+    if not ledger_store.restore(payment_id):
+        abort(404)
+    return jsonify(to_api_row(ledger_store.get(payment_id)))
+
+
+@app.delete("/api/payments/<payment_id>/purge")
+def purge_payment(payment_id):
+    row = ledger_store.purge(payment_id)
+    if row is None:
+        abort(404)
+    file_path = row.get("file_path")
+    if file_path:
+        Path(file_path).unlink(missing_ok=True)
+    return jsonify({"ok": True})
+
+
 def _unique_dest(directory: Path, filename: str) -> Path:
     """Two uploads sharing a name would otherwise overwrite each other on disk —
     the second file to be processed would then vanish mid-batch."""

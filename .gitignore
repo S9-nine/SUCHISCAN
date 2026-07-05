@@ -9,3 +9,4 @@ ledger.csv
 screenshots/*
 !screenshots/.gitkeep
 archive/
+backups/

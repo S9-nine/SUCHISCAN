@@ -12,6 +12,16 @@
     <header>
       <h1 class="logo" id="logo">Suchi<span class="accent">Scan</span></h1>
       <p class="tagline">Payment screenshots in. Clean, verifiable ledger out.</p>
+      <div class="header-actions">
+        <button id="palette-btn" class="icon-btn" title="Search everything (Ctrl/Cmd+K)" aria-label="Search everything">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button id="theme-btn" class="icon-btn" title="Toggle dark mode (d)" aria-label="Toggle dark mode">
+          <svg id="theme-icon-dark" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+          <svg id="theme-icon-light" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hidden"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+        <button id="help-btn" class="icon-btn" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
+      </div>
     </header>
 
     <section id="view-menu" class="view">
@@ -23,6 +33,7 @@
         </div>
         <div class="toolbar-actions">
           <button id="process-folder-btn" class="secondary">Process folder</button>
+          <button id="trash-btn" class="secondary">Trash<span class="count-badge hidden" id="trash-count">0</span></button>
           <button id="export-btn" class="primary">Download Excel</button>
         </div>
       </div>
@@ -30,14 +41,18 @@
       <div class="metrics">
         <div class="metric-card"><div class="label">Payments</div><div class="value" id="m-count">0</div></div>
         <div class="metric-card"><div class="label">Total amount</div><div class="value green" id="m-total">₹0</div></div>
-        <div class="metric-card"><div class="label">Needs review</div><div class="value amber" id="m-review">0</div></div>
+        <div class="metric-card">
+          <div class="label">Needs review</div>
+          <div class="value amber" id="m-review">0</div>
+          <button id="review-btn" class="link-btn review-cta hidden">Review now &rarr;</button>
+        </div>
         <div class="metric-card"><div class="label">Avg OCR confidence</div><div class="value" id="m-conf">0%</div></div>
       </div>
 
       <div class="filters">
         <select id="filter-app"><option value="">All apps</option></select>
         <select id="filter-status"><option value="">All statuses</option></select>
-        <input type="text" id="filter-search" placeholder="Search name or transaction ID">
+        <input type="text" id="filter-search" placeholder="Search name or transaction ID (/)">
       </div>
 
       <div id="payment-list" class="payment-list"></div>
@@ -45,7 +60,15 @@
     </section>
 
     <section id="view-detail" class="view hidden">
-      <button id="back-btn" class="link-btn">&larr; Back to list</button>
+      <div class="detail-topbar">
+        <button id="back-btn" class="link-btn">&larr; Back to list</button>
+        <div id="review-nav" class="review-nav hidden">
+          <button id="review-prev-btn" class="icon-btn" aria-label="Previous flagged">&larr;</button>
+          <span id="review-counter"></span>
+          <button id="review-next-btn" class="icon-btn" aria-label="Next flagged">&rarr;</button>
+          <button id="review-exit-btn" class="link-btn">Exit review</button>
+        </div>
+      </div>
       <div class="detail-pane">
         <div class="detail-left" id="detail-left">
           <div id="detail-fields"></div>
@@ -54,6 +77,7 @@
             <button id="edit-btn" class="secondary">Edit</button>
             <button id="save-btn" class="primary hidden">Save</button>
             <button id="cancel-btn" class="secondary hidden">Cancel</button>
+            <button id="delete-btn" class="danger">Delete</button>
           </div>
 
           <div class="notes-block">
@@ -69,6 +93,34 @@
         </div>
       </div>
     </section>
+
+    <section id="view-trash" class="view hidden">
+      <button id="trash-back-btn" class="link-btn">&larr; Back to list</button>
+      <h2 class="section-title">Trash</h2>
+      <p class="section-subtitle">Deleted payments stay here until you remove them for good.</p>
+      <div id="trash-list" class="payment-list"></div>
+      <p id="trash-empty" class="empty-state hidden">Nothing in the trash.</p>
+    </section>
+  </div>
+
+  <div id="palette-overlay" class="overlay hidden">
+    <div class="glass-panel palette-panel">
+      <input id="palette-input" type="text" placeholder="Search payments, or type a command…" autocomplete="off">
+      <div id="palette-results" class="palette-results"></div>
+    </div>
+  </div>
+
+  <div id="shortcuts-overlay" class="overlay hidden">
+    <div class="glass-panel shortcuts-panel">
+      <h3>Keyboard shortcuts</h3>
+      <div class="shortcut-row"><kbd>Ctrl/Cmd</kbd><kbd>K</kbd><span>Command palette</span></div>
+      <div class="shortcut-row"><kbd>/</kbd><span>Focus search</span></div>
+      <div class="shortcut-row"><kbd>D</kbd><span>Toggle dark mode</span></div>
+      <div class="shortcut-row"><kbd>&larr;</kbd><kbd>&rarr;</kbd><span>Move between flagged payments in Review mode</span></div>
+      <div class="shortcut-row"><kbd>Esc</kbd><span>Back / close</span></div>
+      <div class="shortcut-row"><kbd>?</kbd><span>This overlay</span></div>
+      <button id="shortcuts-close-btn" class="secondary">Close</button>
+    </div>
   </div>
 
   <script src="/app.js"></script>
