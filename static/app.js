@@ -2,6 +2,7 @@ const EDITABLE_FIELDS = [
   { key: "app", label: "App" },
   { key: "amount", label: "Amount (₹)" },
   { key: "date_time", label: "Date & time" },
+  { key: "utr", label: "UTR" },
   { key: "transaction_id", label: "Transaction ID" },
   { key: "party", label: "Party" },
   { key: "direction", label: "Direction" },
@@ -106,7 +107,7 @@ function filteredPayments() {
     if (app && r.app !== app) return false;
     if (status && r.status !== status) return false;
     if (search) {
-      const hay = `${r.party} ${r.transaction_id} ${r.notes}`.toLowerCase();
+      const hay = `${r.party} ${r.utr} ${r.transaction_id} ${r.notes}`.toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
@@ -384,7 +385,7 @@ function closePalette() {
 function renderPaletteResults(query) {
   const q = query.trim().toLowerCase();
   const paymentMatches = !q ? [] : allPayments.filter(p =>
-    `${p.file} ${p.app} ${p.party} ${p.transaction_id}`.toLowerCase().includes(q)
+    `${p.file} ${p.app} ${p.party} ${p.utr} ${p.transaction_id}`.toLowerCase().includes(q)
   ).slice(0, 8).map(p => ({
     title: `${p.party || p.file} — ₹${p.amount || "?"}`,
     hint: p.app || "payment",
@@ -432,10 +433,10 @@ function updateThemeIcon() {
 function setTheme(mode) {
   if (mode) {
     document.documentElement.dataset.theme = mode;
-    localStorage.setItem("suchiscan-theme", mode);
+    localStorage.setItem("s9scan-theme", mode);
   } else {
     delete document.documentElement.dataset.theme;
-    localStorage.removeItem("suchiscan-theme");
+    localStorage.removeItem("s9scan-theme");
   }
   updateThemeIcon();
 }
@@ -445,7 +446,7 @@ function toggleTheme() {
 }
 
 function initTheme() {
-  const saved = localStorage.getItem("suchiscan-theme");
+  const saved = localStorage.getItem("s9scan-theme");
   if (saved) document.documentElement.dataset.theme = saved;
   updateThemeIcon();
 }

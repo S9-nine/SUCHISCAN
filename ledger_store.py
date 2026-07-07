@@ -1,5 +1,5 @@
 """
-PayLedger — local ledger storage
+S9SCAN — local ledger storage
 CSV-backed for now. Every function here is the seam to swap in a real
 database later without touching the API layer in app.py.
 """
@@ -15,7 +15,7 @@ LEDGER = ROOT / "ledger.csv"
 BACKUP_DIR = ROOT / "backups"
 MAX_BACKUPS = 20
 
-COLUMNS = ["id", "file", "app", "amount", "date_time", "transaction_id", "party",
+COLUMNS = ["id", "file", "app", "amount", "date_time", "utr", "transaction_id", "party",
            "direction", "status", "ocr_confidence", "needs_review",
            "review_reasons", "notes", "deleted", "file_path", "processed_at"]
 
@@ -29,6 +29,8 @@ def _load_df(include_deleted: bool = True) -> pd.DataFrame:
         df["id"] = ""
     if "notes" not in df.columns:
         df["notes"] = ""
+    if "utr" not in df.columns:
+        df["utr"] = ""
     if "deleted" not in df.columns:
         df["deleted"] = "False"
     df["deleted"] = df["deleted"].astype(str).str.lower() == "true"
@@ -87,9 +89,12 @@ def append(row: dict) -> dict:
     return row
 
 
-def known_transaction_ids() -> set:
+def known_references() -> set:
+    """All UTRs and transaction IDs seen so far, for duplicate detection.
+    A payment is a duplicate if either its UTR or its transaction ID is already known
+    — the two are tracked in one set since a screenshot may carry only one of them."""
     df = _load_df()
-    return set(df["transaction_id"]) - {""}
+    return (set(df["utr"]) | set(df["transaction_id"])) - {""}
 
 
 def soft_delete(payment_id: str) -> bool:

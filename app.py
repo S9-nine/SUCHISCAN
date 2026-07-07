@@ -1,5 +1,5 @@
 """
-PayLedger — local payment screenshot extraction
+S9SCAN — local payment screenshot extraction
 Run with:  python app.py
 Everything stays on your machine. No cloud, no API keys, no database (yet).
 """
@@ -44,7 +44,7 @@ def to_api_row(row: dict) -> dict:
 
 
 def process_and_append(paths: list[Path]) -> tuple[int, list[str]]:
-    known = ledger_store.known_transaction_ids()
+    known = ledger_store.known_references()
     added = 0
     errors = []
     for p in paths:
@@ -59,7 +59,7 @@ def process_and_append(paths: list[Path]) -> tuple[int, list[str]]:
         except Exception as e:
             errors.append(f"{p.name}: {e}")
             continue
-        if payment.transaction_id and payment.transaction_id in known:
+        if (payment.utr and payment.utr in known) or (payment.transaction_id and payment.transaction_id in known):
             p.unlink(missing_ok=True)  # duplicate — skip and clean up
             continue
         archive_screenshot(payment, ARCHIVE)
@@ -67,7 +67,7 @@ def process_and_append(paths: list[Path]) -> tuple[int, list[str]]:
         row.pop("raw_text", None)
         row["processed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
         ledger_store.append(row)
-        known.add(payment.transaction_id)
+        known.update(r for r in (payment.utr, payment.transaction_id) if r)
         added += 1
     return added, errors
 
@@ -115,7 +115,7 @@ def get_payment(payment_id):
 def update_payment(payment_id):
     fields = request.get_json(force=True)
     fields = {k: v for k, v in fields.items()
-              if k in ("amount", "transaction_id", "party", "date_time",
+              if k in ("amount", "utr", "transaction_id", "party", "date_time",
                         "direction", "app", "status")}
     fields["needs_review"] = False
     fields["review_reasons"] = ""
@@ -202,7 +202,7 @@ def export():
     return send_file(
         io.BytesIO(data),
         as_attachment=True,
-        download_name="payledger.xlsx",
+        download_name="s9scan.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
 

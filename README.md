@@ -1,4 +1,4 @@
-# SuchiScan
+# S9SCAN
 
 Payment screenshots in. Clean, verifiable ledger out. Runs 100% on your machine — no cloud, no API keys, no cost.
 
@@ -56,6 +56,23 @@ Your browser opens a local page (usually http://127.0.0.1:5000). It only exists 
 - `screenshots/` — inbox for new screenshots
 - `archive/` — processed screenshots, organized by month
 - `backups/` — timestamped snapshots of `ledger.csv`, newest 20 kept
+
+## Running tests
+
+```
+pip install -r requirements-dev.txt
+pytest
+```
+
+Covers the field-extraction regexes, the OCR retry/escalation logic, and an end-to-end pass against synthetic screenshots. If Tesseract isn't installed, the OCR-dependent tests skip automatically instead of failing.
+
+## Debugging a scan that got something wrong
+
+```
+python extractor.py debug path/to/screenshot.png
+```
+
+Prints the raw OCR text alongside every extracted field, so you can see exactly what Tesseract read and why a field parsed the way it did.
 
 ## Adding a real database later
 
